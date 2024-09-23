@@ -1,0 +1,19 @@
+{
+  "name": "intellisplit_pdf",
+  "version": "1.0.0",
+  "description": "**IntelliSplit PDF** is a powerful and intuitive tool that allows you to split a multi-page PDF based on keywords or specific text, rename the extracted pages according to a customizable pattern, and save them locally or directly to a cloud directory.",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Filipe Galvão",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pdf-lib": "^1.17.1",
+    "pdf-parse": "^1.1.1",
+    "puppeteer": "^23.4.0",
+    "yoctocolors": "^2.1.1"
+  }
+}
