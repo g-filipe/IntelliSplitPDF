@@ -1,82 +1,45 @@
-import { createRequire } from "module";
-const require = createRequire(import.meta.url);
-const pdfParse = require("pdf-parse");
-import { PDFDocument } from "pdf-lib";
-import fs, { existsSync } from "fs";
+import express from "express";
+import fileUpload from "express-fileupload";
+import fs from "fs";
+import path from "path";
+import { intelliSplit } from "./intellisplit.js";
+import cors from "cors";
 import { execSync } from "child_process";
-import { monthNumbers } from "./monthNumbers.js";
 
-const fileOutputFolder =
-  "Pasta Compartilhada - Contracheques dos Colaboradores";
+const saveInputDir = 'input';
+execSync(`mkdir -p ${saveInputDir}`)
 
-export async function intelliSplit(fileInputPath) {
+const app = express();
 
-  if (!fs.existsSync(fileInputPath)) {
-    console.error(`Erro: O arquivo ${fileInputPath} não foi encontrado.`);
-    process.exit(1);
+app.use(cors());
+app.use(fileUpload());
+
+app.post("/upload", async (req, res) => {
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send("No file found.");
   }
-  const totalPages = await splitPdf(fileInputPath);
 
-  execSync(`rm -rf output`);
+  const payslipFile = req.files.payslip;
+  const uploadPath = path.join(saveInputDir, payslipFile.name);
 
-  for (let i = 0; i < totalPages; i++) {
-    const { name, month, year } = await pdfExtractInfo(`temp/${i}.pdf`);
-    const monthNumber = monthNumbers[month];
-
-    const excludePrepositions = ["da", "de", "do", "e", "&", "das", "dos"];
-
-    const dirName = name
-      .toLowerCase()
-      .split(" ")
-      .map((word) => {
-        if (excludePrepositions.includes(word)) {
-          return word;
-        } else {
-          return word[0].toUpperCase() + word.substring(1);
-        }
-      })
-      .join(" ");
-
-    const firstName = dirName.split(" ")[0];
-    const lastName = dirName.split(" ").pop();
-
-    let fileName = `${firstName}_${lastName}_${monthNumber}_${year}`;
-
-    execSync(`mkdir -p '${fileOutputFolder}/${dirName}'`);
-
-    if (month == 0) month = 12;
-
-    if (existsSync(`${fileOutputFolder}/${dirName}/${fileName}.pdf`)) {
-      fileName += "_ferias";
+  payslipFile.mv(uploadPath, async (err) => {
+    if (err) {
+      return res.status(500).send(err);
     }
-    execSync(
-      `mv temp/${i}.pdf '${fileOutputFolder}/${dirName}/${fileName}.pdf'`
-    );
-  }
-}
 
-async function splitPdf(fileInputPath) {
-  const pdfData = fs.readFileSync(fileInputPath);
-  const originalPdfDoc = await PDFDocument.load(pdfData);
-  const pages = originalPdfDoc.getPages();
+    try {
+      await intelliSplit(uploadPath);
+      res.json({ message: "File uploaded and processed successfully!" });
+    } catch (error) {
+      console.log(error);
+      res.status(500).send(`Error processing the file: ${error.message}`);
+    } finally {
+      fs.unlinkSync(uploadPath);
+    }
+  });
+});
 
-  for (let i = 0; i < pages.length; i++) {
-    const newPdfDoc = await PDFDocument.create();
-    const [copiedPage] = await newPdfDoc.copyPages(originalPdfDoc, [i]);
-    newPdfDoc.addPage(copiedPage);
-    const pdfBytes = await newPdfDoc.save();
-    fs.writeFileSync(`temp/${i}.pdf`, pdfBytes);
-  }
-
-  return pages.length;
-}
-
-async function pdfExtractInfo(pdfPath) {
-  let dataBuffer = fs.readFileSync(pdfPath);
-  const data = await pdfParse(dataBuffer);
-  return {
-    name: data.text.match(/[0-9]+([A-Z ]+)CBO :/)[1],
-    month: data.text.match(/mês de ([A-Z][a-z]+)\/([0-9]+)/)[1],
-    year: data.text.match(/mês de ([A-Z][a-z]+)\/([0-9]+)/)[2],
-  };
-}
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});

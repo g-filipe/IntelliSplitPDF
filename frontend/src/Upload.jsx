@@ -7,9 +7,7 @@ const FileUpload = () => {
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files
-      ? e.target.files[0]
-      : e.dataTransfer.files[0];
+    const selectedFile = e.target.files ? e.target.files[0] : e.dataTransfer.files[0];
     setFile(selectedFile);
   };
 
@@ -17,7 +15,7 @@ const FileUpload = () => {
     e.preventDefault();
     if (file) {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("payslip", file);
 
       fetch("http://localhost:3000/upload", {
         method: "POST",
@@ -58,7 +56,7 @@ const FileUpload = () => {
     <div>
       <form onSubmit={handleSubmit}>
         <div
-          class="dragging"
+          className="dragging"
           ref={dropRef}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -79,7 +77,10 @@ const FileUpload = () => {
       {file && (
         <p>
           Arquivo selecionado:
-          <span style={{  color: "#45a049", fontStyle:"italic" }}> {file.name}</span>
+          <span style={{ color: "#45a049", fontStyle: "italic" }}>
+            {" "}
+            {file.name}
+          </span>
         </p>
       )}
     </div>
