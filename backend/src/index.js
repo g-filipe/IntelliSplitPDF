@@ -7,7 +7,6 @@ import cors from "cors";
 import { execSync } from "child_process";
 
 const saveInputDir = 'input';
-execSync(`mkdir -p ${saveInputDir}`)
 
 const app = express();
 
@@ -18,7 +17,9 @@ app.post("/upload", async (req, res) => {
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send("No file found.");
   }
-
+  
+  execSync(`mkdir -p ${saveInputDir}`)
+  
   const payslipFile = req.files.payslip;
   const uploadPath = path.join(saveInputDir, payslipFile.name);
 
