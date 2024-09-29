@@ -52,7 +52,7 @@ export async function intelliSplit(fileInputPath) {
     );
   }
 
-  zipOutput();
+  return zipOutput();
 }
 
 async function splitPdf(fileInputPath) {
@@ -83,10 +83,10 @@ async function pdfExtractInfo(pdfPath) {
 }
 
 async function zipOutput() {
+  
   const zip = new AdmZip();
 
   zip.addLocalFolder(`${fileOutputFolder}`);
-  zip.writeZip("test.zip");
 
-  //return zip.toBuffer();
+  return zip.toBuffer();
 }
