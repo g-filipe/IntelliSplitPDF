@@ -1,36 +1,55 @@
 import React, { useState, useRef } from "react";
 import "./Upload.css";
+import { ClipLoader } from "react-spinners";
 
 const FileUpload = () => {
+  const [isProcessing, setIsProcessing] = useState(false);
   const [file, setFile] = useState(null);
   const dropRef = useRef(null);
   const inputRef = useRef(null);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files ? e.target.files[0] : e.dataTransfer.files[0];
+    const selectedFile = e.target.files
+      ? e.target.files[0]
+      : e.dataTransfer.files[0];
     setFile(selectedFile);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (file) {
-      const formData = new FormData();
-      formData.append("payslip", file);
 
-      fetch("http://localhost:3000/upload", {
-        method: "POST",
-        body: formData,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Upload bem-sucedido:", data);
-        })
-        .catch((error) => {
-          console.error("Erro no upload:", error);
-        });
-    } else {
-      alert("Por favor, selecione ou arraste um arquivo primeiro");
+    if (!file) {
+      return alert("Por favor, selecione ou arraste um arquivo primeiro");
     }
+
+    setIsProcessing(true);
+
+    const formData = new FormData();
+    formData.append("payslip", file);
+
+    const response = await fetch("http://localhost:3000/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    try {
+      const blob = await response.blob();
+
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: "application/zip" })
+      );
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${file.name.replace("pdf", "zip")}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      setFile(null);
+    } catch (error) {
+      console.error("Upload failed:", error);
+    }
+    setIsProcessing(false);
   };
 
   const handleDragOver = (e) => {
@@ -72,7 +91,7 @@ const FileUpload = () => {
             style={{ display: "none" }}
           />
         </div>
-        <button type="submit">Enviar</button>
+        { isProcessing ? <ClipLoader color="#71EA6C" /> : <button type="submit">Enviar</button> }
       </form>
       {file && (
         <p>
