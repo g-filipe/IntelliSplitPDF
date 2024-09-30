@@ -1,4 +1,6 @@
+import "dotenv/config.js";
 import express from "express";
+import https from "https";
 import fileUpload from "express-fileupload";
 import fs from "fs";
 import path from "path";
@@ -41,6 +43,21 @@ app.post("/upload", async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+
+if (process.env.IS_PROD) {
+  const httpsServer = https.createServer(
+    {
+      cert: fs.readFileSync(process.env.SSL_CERTIFICATE, "utf8"),
+      key: fs.readFileSync(process.env.PRIVATE_KEY, "utf8"),
+    },
+    app
+  );
+
+  httpsServer.listen(PORT, () => {
+    console.log(`HTTPS server running on port ${PORT}`);
+  });
+} else {
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}

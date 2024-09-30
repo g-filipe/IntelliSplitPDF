@@ -1,10 +1,9 @@
 import { createRequire } from "module";
 const require = createRequire(import.meta.url);
-import "dotenv/config.js";
 import AdmZip from "adm-zip";
 const pdfParse = require("pdf-parse");
 import { PDFDocument } from "pdf-lib";
-import fs, { existsSync, readdirSync } from "fs";
+import fs, { existsSync } from "fs";
 import { execSync } from "child_process";
 import { monthNumbers } from "./monthNumbers.js";
 
