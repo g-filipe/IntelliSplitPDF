@@ -27,7 +27,7 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append("payslip", file);
 
-    const response = await fetch("http://localhost:3000/upload", {
+    const response = await fetch("http://intellisplit.duckdns.org:3000/upload", {
       method: "POST",
       body: formData,
     });
