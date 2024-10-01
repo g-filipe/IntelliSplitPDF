@@ -27,7 +27,7 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append("payslip", file);
 
-    const response = await fetch("http://intellisplit.duckdns.org:3000/upload", {
+    const response = await fetch("https://intellisplit.duckdns.org:3000/upload", {
       method: "POST",
       body: formData,
     });
@@ -46,6 +46,8 @@ const FileUpload = () => {
       link.click();
       link.parentNode.removeChild(link);
       setFile(null);
+      inputRef.current.value = "";
+
     } catch (error) {
       console.error("Upload failed:", error);
     }
