@@ -51,7 +51,11 @@ export async function intelliSplit(fileInputPath) {
     );
   }
 
-  return zipOutput();
+  const zip = zipOutput();
+
+  execSync(`rm -rf '${fileOutputFolder}'`);
+
+  return zip;
 }
 
 async function splitPdf(fileInputPath) {
@@ -82,7 +86,6 @@ async function pdfExtractInfo(pdfPath) {
 }
 
 async function zipOutput() {
-  
   const zip = new AdmZip();
 
   zip.addLocalFolder(`${fileOutputFolder}`);
