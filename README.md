@@ -9,3 +9,5 @@
 - Save the split files to a local directory or cloud storage.
 - Simple and user-friendly interface.
 - Supports large PDF files.
+
+https://g-filipe.github.io/IntelliSplitPDF/
