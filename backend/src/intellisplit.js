@@ -21,7 +21,9 @@ export async function intelliSplit(fileInputPath) {
   execSync(`rm -rf '${fileOutputFolder}'`);
 
   for (let i = 0; i < totalPages; i++) {
-    const { name, month, year } = await pdfExtractInfo(`temp/${i}.pdf`);
+    const { name, infoType, month, year } = await pdfExtractInfo(
+      `temp/${i}.pdf`
+    );
     const monthNumber = monthNumbers[month];
 
     const excludePrepositions = ["da", "de", "do", "e", "&", "das", "dos"];
@@ -43,9 +45,14 @@ export async function intelliSplit(fileInputPath) {
 
     execSync(`mkdir -p '${fileOutputFolder}/${dirName}'`);
 
-    if (existsSync(`${fileOutputFolder}/${dirName}/${fileName}.pdf`)) {
+    if (infoType === "adiantamento13") {
+      fileName += "_adiantamento_13";
+    } else if (infoType === "13salario") {
+      fileName += "_13";
+    } else if (existsSync(`${fileOutputFolder}/${dirName}/${fileName}.pdf`)) {
       fileName += "_ferias";
     }
+    
     execSync(
       `mv temp/${i}.pdf '${fileOutputFolder}/${dirName}/${fileName}.pdf'`
     );
@@ -77,11 +84,14 @@ async function splitPdf(fileInputPath) {
 async function pdfExtractInfo(pdfPath) {
   const dataBuffer = fs.readFileSync(pdfPath);
   const data = await pdfParse(dataBuffer);
-
+  const textMatch = data.text.match(
+    /(mês de |Adiantamento 13o\.Salário |13o\.Salário )([A-Z][a-z]+)\/([0-9]+)/
+  );
   return {
     name: data.text.match(/[0-9]+([A-Z ]+)CBO :/)[1],
-    month: data.text.match(/mês de ([A-Z][a-z]+)\/([0-9]+)/)[1],
-    year: data.text.match(/mês de ([A-Z][a-z]+)\/([0-9]+)/)[2],
+    infoType: textMatch[1] === "mês de " ? "mes" :(textMatch[1] === "Adiantamento 13o.Salário " ? "adiantamento13": "13salario"),
+    month: textMatch[2],
+    year: textMatch[3],
   };
 }
 
