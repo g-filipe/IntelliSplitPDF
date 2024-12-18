@@ -61,14 +61,9 @@ const App = () => {
     dropRef.current.classList.add("dragging");
   };
 
-  const handleDragLeave = () => {
-    dropRef.current.classList.remove("dragging");
-  };
-
   const handleDrop = (e) => {
     e.preventDefault();
     handleFileChange(e);
-    dropRef.current.classList.remove("dragging");
   };
 
   const handleClick = () => {
@@ -84,7 +79,7 @@ const App = () => {
             className="dragging"
             ref={dropRef}
             onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
+            // onDragLeave={handleDragLeave}
             onDrop={handleDrop}
             onClick={handleClick}
           >
